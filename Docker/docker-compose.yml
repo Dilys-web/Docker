@@ -1,24 +1,24 @@
-# version: "3.9" # specify the version of the compose file format
-# services: # define the services or containers that make up your application
-#   web: # name of the first service
-#     image: nginx # name of the image to use for this service
-#     ports: # list of ports to expose on the host machine
-#       - "80:80"
-#     volumes: # list of volumes to mount on this service
-#       - ./web:/usr/share/nginx/html # mount the ./web directory on the host as /usr/share/nginx/html in the container
-#     depends_on: # list of services that this service depends on
-#       - api # depend on the api service
-#   api: # name of the second service
-#     build: ./api # path to the directory containing the Dockerfile for this service
-#     environment: # list of environment variables to pass to this service
-#       - MONGO_URL=mongodb://db:27017/test # specify the URL for connecting to MongoDB
-#     ports: # list of ports to expose on the host machine
-#       - "3000:3000"
-#     depends_on: # list of services that this service depends on
-#       - db # depend on the db service
-#   db: # name of the third service
-#     image: mongo # name of the image to use for this service
-#     volumes: # list of volumes to mount on this service
-#       - db_data:/data/db # mount a named volume called db_data as /data/db in the container
-# volumes: # define any named volumes used by the services
-#   db_data: # name of the volume for persisting database data
+version: "3.9" # specify the version of the compose file format
+services: # define the services or containers that make up your application
+  web: # name of the first service
+    image: nginx # name of the image to use for this service
+    ports: # list of ports to expose on the host machine
+      - "80:80"
+    volumes: # list of volumes to mount on this service
+      - ./web:/usr/share/nginx/html # mount the ./web directory on the host as /usr/share/nginx/html in the container
+    depends_on: # list of services that this service depends on
+      - api # depend on the api service
+  api: # name of the second service
+    build: ./api # path to the directory containing the Dockerfile for this service
+    environment: # list of environment variables to pass to this service
+      - MONGO_URL=mongodb://db:27017/test # specify the URL for connecting to MongoDB
+    ports: # list of ports to expose on the host machine
+      - "3000:3000"
+    depends_on: # list of services that this service depends on
+      - db # depend on the db service
+  db: # name of the third service
+    image: mongo # name of the image to use for this service
+    volumes: # list of volumes to mount on this service
+      - db_data:/data/db # mount a named volume called db_data as /data/db in the container
+volumes: # define any named volumes used by the services
+  db_data: # name of the volume for persisting database data
