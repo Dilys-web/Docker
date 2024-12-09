@@ -44,7 +44,7 @@ pipeline {
                     sshagent(['ssh-key']){  
 
                     def ec2Instance = "${EC2_HOST}"
-                    def dockerImage = "${DOCKER_IMAGE}":latest"
+                    def dockerImage = "${DOCKER_IMAGE}:latest"
 
                     sh """
                     ssh -o StrictHostKeyChecking=no ${ec2Instance} '
