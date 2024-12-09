@@ -4,10 +4,10 @@ pipeline {
     agent any
 
     environment {
-        DOCKER_IMAGE = "dilys243/flask-app" 
-        DOCKER_REGISTRY = "dilys243/flask_docker_app" 
-        EC2_HOST = "ubuntu@44.204.159.53"
-        APP_PORT = "5000" 
+        DOCKER_IMAGE = 'dilys243/flask-app'
+        DOCKER_REGISTRY = 'dilys243/flask_docker_app'
+        EC2_HOST = 'ubuntu@44.204.159.53'
+        APP_PORT = '5000'
     }
 
     stages {
@@ -20,8 +20,13 @@ pipeline {
         stage('Code Testing') {
             steps {
                 dir('Flask_app') {
-                    sh 'pip install -r requirements.txt' 
-                    sh 'pytest'    
+                    script {
+                        sh 'python3 -m venv venv'
+
+                        sh '. venv/bin/activate && pip install -r requirements.txt'
+
+                        sh '. venv/bin/activate && pytest'
+                    }
                 }
             }
         }
@@ -41,8 +46,9 @@ pipeline {
         stage('Deploy Application to EC2 Instance') {
             steps {
                 script {
-                    withCredentials([usernamePassword(credentialsId: 'docker-Cred', usernameVariable: 'DockerUsername', passwordVariable: 'DockerPassword')]) {
-                        sshagent(['ssh-key']) {  
+                    withCredentials([usernamePassword(credentialsId: 'docker-Cred', usernameVariable: 'DockerUsername',
+                     passwordVariable: 'DockerPassword')]) {
+                        sshagent(['ssh-key']) {
                             def ec2Instance = "${EC2_HOST}"
                             // Use DOCKER_IMAGE for pulling the image
                             def dockerImage = "${DOCKER_IMAGE}:latest"
@@ -56,7 +62,7 @@ pipeline {
                             '
                             """
                         }
-                    }
+                     }
                 }
             }
         }
@@ -64,7 +70,7 @@ pipeline {
 
     post {
         success {
-            echo 'Application deployed successfully!'        
+            echo 'Application deployed successfully!'
         }
         failure {
             echo 'Application deployment failed!'
