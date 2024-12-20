@@ -22,17 +22,34 @@ pipeline {
                 dir('Flask_app') {
                     script {
                         sh 'python3 -m venv venv'
-
                         sh '. venv/bin/activate && pip install -r requirements.txt'
                     }
                 }
             }
         }
 
+
+        stage('SonarQube Analysis') {
+            steps {
+                script {
+                    withSonarQubeEnv('My SonarQube Server') { 
+                        dir('Flask_app') {
+                            sh '''
+                            sonar-scanner \
+                            -Dsonar.projectKey=flask-app \
+                            -Dsonar.sources=. \
+                            -Dsonar.host.url=http://139.162.172.244:9000 \
+                            -Dsonar.login=${env.SONAR_TOKEN}
+                            '''
+                    }
+                }
+            }
+        }
+        }
+
         stage('Build Docker Image') {
             steps {
                 script {
-                    // Use DOCKER_IMAGE for the image name
                     def dockerImage = "${DOCKER_IMAGE}:latest"
                     dir('Flask_app') {
                         sh "docker build -t ${dockerImage} ."
@@ -48,7 +65,6 @@ pipeline {
                      passwordVariable: 'DockerPassword')]) {
                         sshagent(['ssh-key']) {
                             def ec2Instance = "${EC2_HOST}"
-                            // Use DOCKER_IMAGE for pulling the image
                             def dockerImage = "${DOCKER_IMAGE}:latest"
                             sh """
                             ssh -o StrictHostKeyChecking=no ${ec2Instance} '
