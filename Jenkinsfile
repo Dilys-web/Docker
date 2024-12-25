@@ -35,9 +35,9 @@ pipeline {
                     withSonarQubeEnv('My SonarQube Server') { 
                         dir('Flask_app') {
                             sh '''
-                            export SONAR_TOKEN-=${SONAR_TOKEN}
+                        //   export SONAR_TOKEN-=${SONAR_TOKEN} 
                             sonar-scanner \
-                            -Dsonar.projectKey=flask-app \
+                            -Dsonar.projectKey=Flask-Application \
                             -Dsonar.sources=. \
                             -Dsonar.host.url=http://139.162.172.244:9000 \
                             -Dsonar.login=$SONAR_TOKEN
