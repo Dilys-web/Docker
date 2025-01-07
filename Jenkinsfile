@@ -33,6 +33,8 @@ pipeline {
             steps {
                 script {
                     withSonarQubeEnv('My SonarQube Server') { 
+                        withEnv(["JAVA_HOME=${tool 'jdk17'}", 
+                            "PATH=${tool 'jdk17'}/bin:/opt/sonar-scanner/bin:${env.PATH}"]) {
                         dir('Flask_app') {
                             sh '''
                             sonar-scanner \
@@ -45,6 +47,7 @@ pipeline {
                 }
             }
         }
+            }
     }   
 
         stage('Build Docker Image') {
