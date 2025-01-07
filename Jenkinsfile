@@ -35,7 +35,6 @@ pipeline {
                     withSonarQubeEnv('My SonarQube Server') { 
                         dir('Flask_app') {
                             sh '''
-                        //   export SONAR_TOKEN-=${SONAR_TOKEN} 
                             sonar-scanner \
                             -Dsonar.projectKey=Flask-Application \
                             -Dsonar.sources=. \
@@ -46,7 +45,7 @@ pipeline {
                 }
             }
         }
-    }
+    }   
 
         stage('Build Docker Image') {
             steps {
