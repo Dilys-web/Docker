@@ -107,6 +107,9 @@ pipeline {
         }
         always {
             cleanWs()
+            sh'''
+            rm -rf venv 
+            '''
         }
     }
 }
