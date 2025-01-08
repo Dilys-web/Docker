@@ -41,7 +41,8 @@ pipeline {
                             -Dsonar.projectKey=Flask-Application \
                             -Dsonar.sources=. \
                             -Dsonar.host.url=http://139.162.172.244:9000 \
-                            -Dsonar.qualitygate.wait=true 
+                            -Dsonar.qualitygate.wait=true \
+                            -Dsonar.exclusions=venv/**
                             '''
                     }
                 }
