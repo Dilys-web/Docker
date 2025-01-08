@@ -40,7 +40,8 @@ pipeline {
                             sonar-scanner \
                             -Dsonar.projectKey=Flask-Application \
                             -Dsonar.sources=. \
-                            -Dsonar.host.url=http://139.162.172.244:9000 
+                            -Dsonar.host.url=http://139.162.172.244:9000 \
+                            -Dsonar.qualitygate.wait=true 
                             '''
                     }
                 }
