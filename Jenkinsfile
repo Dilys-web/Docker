@@ -16,18 +16,18 @@ pipeline {
                 git url: 'https://github.com/Dilys-web/Docker.git', branch: 'main'
             }
         }
-
-        stage('Code Testing') {
+        stage('Run Tests') {
             steps {
-                dir('Flask_app') {
-                    script {
-                        sh 'python3 -m venv venv'
-                        sh '. venv/bin/activate && pip install -r requirements.txt'
+                script {
+                    dir('Flask_app') {
+                        sh '''
+                        coverage run -m unittest discover -s tests -p "*.py"
+                        coverage xml
+                        '''
                     }
                 }
             }
         }
-
 
         stage('SonarQube Analysis') {
             steps {
@@ -42,7 +42,8 @@ pipeline {
                             -Dsonar.sources=. \
                             -Dsonar.host.url=http://139.162.172.244:9000 \
                             -Dsonar.qualitygate.wait=true \
-                            -Dsonar.exclusions=venv/**
+                            -Dsonar.exclusions=venv/** \
+                            -Dsonar.python.coverage.reportPaths=coverage.xml
                             '''
                     }
                 }
