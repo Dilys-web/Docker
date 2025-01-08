@@ -16,13 +16,24 @@ pipeline {
                 git url: 'https://github.com/Dilys-web/Docker.git', branch: 'main'
             }
         }
+
+         stage('Install Packages') {
+            steps {
+                dir('Flask_app') {
+                    script {
+                        sh 'python3 -m venv venv'
+                        sh '. venv/bin/activate && pip install -r requirements.txt'
+                    }
+                }
+            }
+        }
+
         stage('Run Tests') {
             steps {
                 script {
                     dir('Flask_app') {
                         sh '''
-                        coverage run -m unittest discover -s tests -p "*.py"
-                        coverage xml
+                        . venv/bin/activate && coverage run -m unittest discover -s tests -p "*.py" && coverage xml
                         '''
                     }
                 }
