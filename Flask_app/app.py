@@ -70,7 +70,7 @@ def register():
       <body>
         <h1>Register</h1>
         <form method="POST">
-          {{ csrf_token()}}
+          <input type="hidden" name="csrf_token" value="{{ csrf_token()}}">
           <label for="name">Name:</label>
           <input type="text" id="name" name="name" required>
           <button type="submit">Register</button>

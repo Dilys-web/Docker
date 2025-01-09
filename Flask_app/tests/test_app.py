@@ -1,6 +1,7 @@
 import unittest
 from flask import Flask
-from app import app  # Replace `app` with the actual module name if different
+from app import app  
+from bs4 import BeautifulSoup
 
 class FlaskAppTestCase(unittest.TestCase):
     def setUp(self):
@@ -36,8 +37,19 @@ class FlaskAppTestCase(unittest.TestCase):
         self.assertIn(b'Name:', response.data)
 
     def test_register_route_post(self):
-        # Test the register route with POST
-        response = self.client.post('/register', data={'name': 'John'})
+        # Fetch the registration form to get the CSRF token
+        response = self.client.get('/register')
+        self.assertEqual(response.status_code, 200)
+        
+        # Extract CSRF token from the form
+        soup = BeautifulSoup(response.data, 'html.parser')
+        csrf_token = soup.find('input', {'name': 'csrf_token'})['value']
+
+        # Send POST request with CSRF token
+        response = self.client.post('/register', data={
+            'name': 'John',
+            'csrf_token': csrf_token
+        })
         self.assertEqual(response.status_code, 200)
         self.assertIn(b'Registration successful! Welcome, John!', response.data)
 
