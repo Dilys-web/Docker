@@ -1,6 +1,12 @@
 from flask import Flask, request, render_template_string
 
+from flask_wtf.csrf import CSRFProtect
+import os
+
 app = Flask(__name__)
+app.secret_key = os.getenv("FLASK_SECRET_KEY", "default_fallback_key")
+
+csrf = CSRFProtect(app)
 
 # Home route
 @app.route('/')
@@ -47,7 +53,9 @@ def about():
 def register():
     if request.method == 'POST':
         # Get the name from the form
-        name = request.form['name']
+        name = request.form.get('name', '').strip()
+        if not name:
+            return "Name is required!", 400
         return f"Registration successful! Welcome, {name}!"
 
     # Render registration form
@@ -62,6 +70,7 @@ def register():
       <body>
         <h1>Register</h1>
         <form method="POST">
+          {{ csrf_token()}}
           <label for="name">Name:</label>
           <input type="text" id="name" name="name" required>
           <button type="submit">Register</button>
