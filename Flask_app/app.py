@@ -49,22 +49,8 @@ def about():
     """
     return render_template_string(html_content)
 
-def validate_request_method(methods):
-    """Decorator to validate HTTP methods"""
-    def decorator(f):
-        @wraps(f)
-        def decorated_function(*args, **kwargs):
-            if request.method not in methods:
-                return "Method not allowed", 405
-            return f(*args, **kwargs)
-        return decorated_function
-    return decorator
-
-@app.route('/register', methods=['GET', 'POST'])
-@validate_request_method(['GET', 'POST'])
-def register():
-    """Secure registration endpoint"""
-    if request.method == 'POST':
+@app.route('/register', methods=['POST'])
+def post_register():
 
         # Get and validate the name
         name = request.form.get('name', '').strip()
@@ -80,7 +66,9 @@ def register():
         # Sanitize output to prevent XSS
         from markupsafe import escape
         return f"Registration successful! Welcome, {escape(name)}!"
-
+    
+@app.route('/register', methods=['GET'])
+def get_register():
     # GET request - render registration form
     html_content = """
         <!doctype html>
