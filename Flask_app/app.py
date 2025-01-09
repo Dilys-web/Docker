@@ -1,7 +1,8 @@
-from flask import Flask, request, render_template_string
+from flask import Flask, request, render_template_string, jsonify
 
 from flask_wtf.csrf import CSRFProtect
 import os
+import re
 
 app = Flask(__name__)
 app.secret_key = os.getenv("FLASK_SECRET_KEY", "default_fallback_key")
@@ -54,9 +55,10 @@ def register():
     if request.method == 'POST':
         # Get the name from the form
         name = request.form.get('name', '').strip()
-        if not name:
-            return "Name is required!", 400
-        return f"Registration successful! Welcome, {name}!"
+        name = re.sub(r'[^\w\s]', '', name)
+        if not name or len(name) > 30:
+            return jsonify({"error": "Name is required!"}), 400
+        return jsonify({"message": f"Registration successful! Welcome, {name}!"}), 200
 
     # Render registration form
     html_content = """
