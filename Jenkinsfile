@@ -1,4 +1,4 @@
-def appName = 'Flask-application'
+// def appName = 'Flask-application'
 
 pipeline {
     agent any
@@ -63,40 +63,41 @@ pipeline {
             }
     }   
 
-        stage('Build Docker Image') {
-            steps {
-                script {
-                    def dockerImage = "${DOCKER_IMAGE}:latest"
-                    dir('Flask_app') {
-                        sh "docker build -t ${dockerImage} ."
-                    }
-                }
-            }
-        }
+    //     stage('Build Docker Image') {
+    //         steps {
+    //             script {
+    //                 def dockerImage = "${DOCKER_IMAGE}:latest"
+    //                 dir('Flask_app') {
+    //                     sh "docker build -t ${dockerImage} ."
+    //                 }
+    //             }
+    //         }
+    //     }
 
-        stage('Deploy Application to EC2 Instance') {
-            steps {
-                script {
-                    withCredentials([usernamePassword(credentialsId: 'docker-Cred', usernameVariable: 'DockerUsername',
-                     passwordVariable: 'DockerPassword')]) {
-                        sshagent(['ssh-key']) {
-                            def ec2Instance = "${EC2_HOST}"
-                            def dockerImage = "${DOCKER_IMAGE}:latest"
-                            sh """
-                            ssh -o StrictHostKeyChecking=no ${ec2Instance} '
-                            echo ${DockerPassword} | docker login -u ${DockerUsername} --password-stdin &&
-                            docker pull ${dockerImage} &&
-                            docker stop ${appName} || true &&
-                            docker rm ${appName} || true &&
-                            docker run -d --name ${appName} -p ${APP_PORT}:${APP_PORT} ${dockerImage}
-                            '
-                            """
-                        }
-                     }
-                }
-            }
-        }
-    }
+    //     stage('Deploy Application to EC2 Instance') {
+    //         steps {
+    //             script {
+    //                 withCredentials([usernamePassword(credentialsId: 'docker-Cred', usernameVariable: 'DockerUsername',
+    //                  passwordVariable: 'DockerPassword')]) {
+    //                     sshagent(['ssh-key']) {
+    //                         def ec2Instance = "${EC2_HOST}"
+    //                         def dockerImage = "${DOCKER_IMAGE}:latest"
+    //                         sh """
+    //                         ssh -o StrictHostKeyChecking=no ${ec2Instance} '
+    //                         echo ${DockerPassword} | docker login -u ${DockerUsername} --password-stdin &&
+    //                         docker pull ${dockerImage} &&
+    //                         docker stop ${appName} || true &&
+    //                         docker rm ${appName} || true &&
+    //                         docker run -d --name ${appName} -p ${APP_PORT}:${APP_PORT} ${dockerImage}
+    //                         '
+    //                         """
+    //                     }
+    //                  }
+    //             }
+    //         }
+    //     }
+     }
+}
 
     post {
         success {
@@ -112,4 +113,4 @@ pipeline {
             '''
         }
     }
-}
+

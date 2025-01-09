@@ -1,14 +1,14 @@
 from flask import Flask, request, render_template_string, jsonify
-
 from flask_wtf import CSRFProtect
 import os
-import re
+from functools import wraps
 
 app = Flask(__name__)
-app.secret_key = os.getenv("FLASK_SECRET_KEY", 'default_secret_key')
-csrf = CSRFProtect()
+app.secret_key = os.getenv("FLASK_SECRET_KEY", "default_fallback_key")
 
+csrf = CSRFProtect()
 csrf.init_app(app)
+
 # Home route
 @app.route('/')
 def home():
@@ -49,42 +49,71 @@ def about():
     """
     return render_template_string(html_content)
 
-# Registration route
-@app.route("/register", methods=['GET', 'POST'] )
+def validate_request_method(methods):
+    """Decorator to validate HTTP methods"""
+    def decorator(f):
+        @wraps(f)
+        def decorated_function(*args, **kwargs):
+            if request.method not in methods:
+                return "Method not allowed", 405
+            return f(*args, **kwargs)
+        return decorated_function
+    return decorator
+
+@app.route('/register', methods=['GET', 'POST'])
+@validate_request_method(['GET', 'POST'])
 def register():
-  
-    if request.method not in ['GET', 'POST']:
-        return "Method not allowed", 405
-
+    """Secure registration endpoint"""
     if request.method == 'POST':
-        # Get the name from the form
+
+        # Get and validate the name
         name = request.form.get('name', '').strip()
-        name = re.sub(r'[^\w\s]', '', name)
+        
+        # Input validation
+        if not name:
+            return "Name is required!", 400
+        if len(name) > 100:  # Prevent extremely long names
+            return "Name is too long!", 400
+        if not name.replace(' ', '').isalnum():  # Basic name validation
+            return "Invalid name format!", 400
+            
+        # Sanitize output to prevent XSS
+        from markupsafe import escape
+        return f"Registration successful! Welcome, {escape(name)}!"
 
-        if not name or len(name) > 30:
-            return jsonify({"error": "Name is required!"}), 400
-        return jsonify({"message": f"Registration successful! Welcome, {name}!"}), 200
-
-    # Render registration form
+    # GET request - render registration form
     html_content = """
-    <!doctype html>
-    <html lang="en">
-      <head>
-        <meta charset="utf-8">
-        <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
-        <title>Register</title>
-      </head>
-      <body>
-        <h1>Register</h1>
-        <form method="POST">
-          <input type="hidden" name="csrf_token" value="{{ csrf_token()}}"> 
-          <label for="name">Name:</label>
-          <input type="text" id="name" name="name" required>
-          <button type="submit">Register</button>
-        </form>
-        <a href="/">Go back to Home</a>
-      </body>
-    </html>
+        <!doctype html>
+        <html lang="en">
+        <head>
+            <meta charset="utf-8">
+            <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+            <title>Register</title>
+            <!-- Add Content Security Policy -->
+            <meta http-equiv="Content-Security-Policy" 
+                  content="default-src 'self'; 
+                          script-src 'self' 'nonce-{{csrf_token()}}'; 
+                          style-src 'self';">
+        </head>
+        <body>
+            <h1>Register</h1>
+            <form method="POST">
+                <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                <div>
+                    <label for="name">Name:</label>
+                    <input type="text" 
+                           id="name" 
+                           name="name" 
+                           required 
+                           maxlength="100" 
+                           pattern="[A-Za-z0-9 ]+"
+                           title="Please enter a valid name using letters, numbers and spaces only">
+                </div>
+                <button type="submit">Register</button>
+            </form>
+            <a href="/">Go back to Home</a>
+        </body>
+        </html>
     """
     return render_template_string(html_content)
 
