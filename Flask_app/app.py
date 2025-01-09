@@ -1,14 +1,14 @@
 from flask import Flask, request, render_template_string, jsonify
 
-from flask_wtf.csrf import CSRFProtect
+from flask_wtf import CSRFProtect
 import os
 import re
 
 app = Flask(__name__)
-app.secret_key = os.getenv("FLASK_SECRET_KEY", "default_fallback_key")
+app.secret_key = os.getenv("FLASK_SECRET_KEY", 'default_secret_key')
+csrf = CSRFProtect()
 
-csrf = CSRFProtect(app)
-
+csrf.init_app(app)
 # Home route
 @app.route('/')
 def home():
@@ -50,12 +50,17 @@ def about():
     return render_template_string(html_content)
 
 # Registration route
-@app.route('/register', methods=['GET', 'POST'])
+@app.route("/register", methods=['GET', 'POST'] )
 def register():
+  
+    if request.method not in ['GET', 'POST']:
+        return "Method not allowed", 405
+
     if request.method == 'POST':
         # Get the name from the form
         name = request.form.get('name', '').strip()
         name = re.sub(r'[^\w\s]', '', name)
+
         if not name or len(name) > 30:
             return jsonify({"error": "Name is required!"}), 400
         return jsonify({"message": f"Registration successful! Welcome, {name}!"}), 200
@@ -72,7 +77,7 @@ def register():
       <body>
         <h1>Register</h1>
         <form method="POST">
-          <input type="hidden" name="csrf_token" value="{{ csrf_token()}}">
+          <input type="hidden" name="csrf_token" value="{{ csrf_token()}}"> 
           <label for="name">Name:</label>
           <input type="text" id="name" name="name" required>
           <button type="submit">Register</button>
@@ -84,4 +89,4 @@ def register():
     return render_template_string(html_content)
 
 if __name__ == "__main__":
-    app.run(host="0.0.0.0", port=5000)
+    app.run(host="0.0.0.0", port=5000, debug=False)
